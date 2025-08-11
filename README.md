@@ -1,2 +1,2 @@
 # QuackScript
-QuackScript is a delightfully unhinged programming language that thrives on chaos and caffeine. Packed with quirky built-ins like coffee() to turbocharge execution, yell() to shout every output in ALL CAPS at triple speed, and blameSomeone() to throw random exceptions at imaginary culprits — it’s the perfect tool when you want your code to be as unpredictable as your creative process.
+QuackScript is my unhinged programming language thats based on chaos and caffeine. I added lots of quirky built-ins like coffee() to make the language randomly faster, yell() to shout every output in ALL CAPS at triple speed, and blameSomeone() to throw random exceptions at random lines of code for no reason at all.
