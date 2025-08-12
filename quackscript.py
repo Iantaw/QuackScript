@@ -659,7 +659,7 @@ class Parser:
         ))
 
     def power(self):
-        return self.bin_op(self.atom, (TT_POW, ), self.factor)
+         return self.bin_op(self.call, (TT_POW,), self.factor)
 
     def call(self):
         res = ParseResult()
