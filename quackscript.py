@@ -642,13 +642,13 @@ class Parser:
             if res.error: return res
             return res.success(for_expr)
         
-        elif tok(TT_KEYWORD, 'WHILE'):
+        elif tok.matches(TT_KEYWORD, 'WHILE'):
             while_expr = res.register(self.while_expr())
             if res.error: return res
             return res.success(while_expr)
         
         elif tok.matches(TT_KEYWORD, 'FUN'):
-            func_def = res.register(self.fun_def())
+            func_def = res.register(self.func_def())
             if res.error: return res
             return res.success(func_def)
             
