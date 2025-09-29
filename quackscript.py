@@ -1,18 +1,85 @@
-# IMPORTS
-
 from strings_with_arrows import string_with_arrows
-
 import string
 import os
 import math
-
-# CONSTANTS
+import random
+import time
 
 DIGITS = '0123456789'
 LETTERS = string.ascii_letters
 LETTERS_DIGITS = LETTERS + DIGITS
 
-# ERRORS
+class DuckMood:
+    def __init__(self):
+        self.mood = "normal"
+        self.operation_count = 0
+        self.last_reset = time.time()
+        self.speed_multiplier = 1.0
+        self.weather = "sunny"
+        self.variable_memory = {}
+        
+    def update_mood(self):
+        if self.operation_count > 100:
+            self.mood = "hyper"
+            self.speed_multiplier = 0.5
+        elif self.operation_count > 50:
+            self.mood = "energetic"
+            self.speed_multiplier = 0.8
+        elif time.time() - self.last_reset > 10:
+            self.mood = "tired"
+            self.speed_multiplier = 1.5
+        else:
+            self.mood = "normal"
+            self.speed_multiplier = 1.0
+            
+        if random.random() < 0.01:
+            self.weather = random.choice(["sunny", "rainy", "stormy", "cloudy"])
+            
+    def execute_delay(self):
+        delay = 0.001 * self.speed_multiplier
+        if self.weather == "rainy":
+            delay *= 1.2
+        elif self.weather == "stormy":
+            delay *= 1.5
+        time.sleep(delay)
+        
+    def increment_operations(self):
+        self.operation_count += 1
+        if time.time() - self.last_reset > 5:
+            self.operation_count = 0
+            self.last_reset = time.time()
+        self.update_mood()
+        
+    def access_variable(self, var_name):
+        current_time = time.time()
+        if var_name in self.variable_memory:
+            last_access = self.variable_memory[var_name]
+            if current_time - last_access > 30 and random.random() < 0.1:
+                del self.variable_memory[var_name]
+                return False
+        self.variable_memory[var_name] = current_time
+        return True
+        
+    def get_mood_string(self):
+        return self.mood
+        
+    def get_weather_string(self):
+        return self.weather
+
+duck_mood = DuckMood()
+
+class Colors:
+    RESET = '\033[0m'
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    CYAN = '\033[96m'
+    
+    @staticmethod
+    def colorize(text, color):
+        return f"{color}{text}{Colors.RESET}"
 
 class Error:
     def __init__(self, pos_start, pos_end, error_name, details):
@@ -22,9 +89,11 @@ class Error:
         self.details = details
 
     def as_string(self):
-        result = f'{self.error_name}: {self.details}\n'
+        result = f'{Colors.colorize(self.error_name, Colors.RED)}: {self.details}\n'
         result += f'File {self.pos_start.fn}, line {self.pos_start.ln + 1}'
         result += '\n\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
+        if duck_mood.weather == "rainy":
+            result = result.replace('\n', '\n~')
         return result
 
 class IllegalCharError(Error):
@@ -46,8 +115,10 @@ class RTError(Error):
 
     def as_string(self):
         result = self.generate_traceback()
-        result += f'{self.error_name}: {self.details}\n'
+        result += f'{Colors.colorize(self.error_name, Colors.RED)}: {self.details}\n'
         result += '\n\n' + string_with_arrows(self.pos_start.ftxt, self.pos_start, self.pos_end)
+        if duck_mood.weather == "rainy":
+            result = result.replace('\n', '\n~')
         return result
 
     def generate_traceback(self):
@@ -61,8 +132,6 @@ class RTError(Error):
             ctx = ctx.parent
 
         return 'Traceback (most recent call last):\n' + result
-
-# POSITION
 
 class Position:
     def __init__(self, idx, ln, col, fn, ftxt):
@@ -84,8 +153,6 @@ class Position:
     
     def copy(self):
         return Position(self.idx, self.ln, self.col, self.fn, self.ftxt)
-
-# TOKENS
 
 TT_INT          = 'INT'
 TT_FLOAT        = 'FLOAT'
@@ -151,8 +218,6 @@ class Token:
     def __repr__(self):
         if self.value: return f'{self.type}:{self.value}'
         return f'{self.type}'
-    
-# LEXER
 
 class Lexer:
     def __init__(self, fn, text):
@@ -349,8 +414,6 @@ class Lexer:
 
         self.advance()
 
-# NODES
-
 class NumberNode:
     def __init__(self, tok):
         self.tok = tok
@@ -423,6 +486,7 @@ class IfNode:
 
         self.pos_start = self.cases[0][0].pos_start
         self.pos_end = (self.else_case or self.cases[len(self.cases) - 1])[0].pos_end
+        
 class ForNode:
     def __init__(self, var_name_tok, start_value_node, end_value_node, step_value_node, body_node, should_return_null):
         self.var_name_tok = var_name_tok
@@ -489,8 +553,6 @@ class BreakNode:
         self.pos_start = pos_start
         self.pos_end = pos_end
 
-# PARSE RESULT
-
 class ParseResult:
     def __init__(self):
         self.error = None
@@ -523,8 +585,6 @@ class ParseResult:
         if not self.error or self.last_registered_advance_count == 0:
             self.error = error
         return self
-
-# PARSER
 
 class Parser:
     def __init__(self, tokens):
@@ -815,7 +875,6 @@ class Parser:
 
             return res.success(ForNode(var_name, start_value, end_value, step_value, body, True))
 
-
         body = res.register(self.statement())
         if res.error: return res
 
@@ -927,7 +986,6 @@ class Parser:
             if res.error: return res
             return res.success(func_def)
             
-            
         return res.failure(InvalidSyntaxError(
             tok.pos_start, tok.pos_end,
             "Expected int, float, identifier, '+', '-', '(', '[', IF', 'FOR', 'WHILE', 'FUN'"
@@ -1032,7 +1090,6 @@ class Parser:
             factor = res.register(self.factor())
             if res.error: return res
             return res.success(UnaryOpNode(tok, factor))
-
 
         return self.power()
 
@@ -1229,8 +1286,6 @@ class Parser:
             left = BinOpNode(left, op_tok, right)
         
         return res.success(left)
-    
-# RUNTIME RESULT
 
 class RTResult:
     def __init__(self):
@@ -1282,8 +1337,6 @@ class RTResult:
             self.loop_should_continue or
             self.loop_should_break
         )
-
-# VALUES
 
 class Value:
     def __init__(self):
@@ -1461,7 +1514,10 @@ class Number(Value):
         return self.value != 0
     
     def __repr__(self):
-        return str(self.value)
+        output = str(self.value)
+        if duck_mood.weather == "stormy":
+            output = Colors.colorize(output, Colors.YELLOW)
+        return output
 
 Number.null = Number(0)
 Number.false = Number(0)
@@ -1498,8 +1554,45 @@ class String(Value):
         return self.value
     
     def __repr__(self):
-        return f'"{self.value}"'
-    
+        output = f'"{self.value}"'
+        if duck_mood.weather == "rainy":
+            output = output + " 💧"
+        return Colors.colorize(output, Colors.GREEN)
+
+class Egg(Value):
+    def __init__(self, func, hatch_time=5):
+        super().__init__()
+        self.func = func
+        self.created_at = time.time()
+        self.hatch_time = hatch_time
+        self.hatched = False
+        
+    def is_ready(self):
+        return time.time() - self.created_at >= self.hatch_time
+        
+    def hatch(self):
+        if self.is_ready():
+            self.hatched = True
+            return self.func, None
+        return None, RTError(
+            self.pos_start, self.pos_end,
+            f'Egg not ready to hatch yet! Wait {self.hatch_time - (time.time() - self.created_at):.1f} more seconds',
+            self.context
+        )
+        
+    def copy(self):
+        copy = Egg(self.func, self.hatch_time)
+        copy.set_pos(self.pos_start, self.pos_end)
+        copy.set_context(self.context)
+        copy.created_at = self.created_at
+        copy.hatched = self.hatched
+        return copy
+        
+    def __repr__(self):
+        if self.hatched:
+            return "🐥"
+        return f"🥚 ({self.hatch_time - (time.time() - self.created_at):.1f}s)"
+
 class List(Value):
     def __init__(self, elements):
         super().__init__()
@@ -1556,7 +1649,8 @@ class List(Value):
         return ", ".join([str(x) for x in self.elements])
     
     def __repr__(self):
-        return f'[{", ".join([str(x) for x in self.elements])}]'
+        output = f'[{", ".join([str(x) for x in self.elements])}]'
+        return Colors.colorize(output, Colors.CYAN)
 
 class BaseFunction(Value):
     def __init__(self, name):
@@ -1648,7 +1742,6 @@ class BuiltInFunction(BaseFunction):
         return_value = res.register(method(exec_ctx))
         if res.should_return(): return res
         return res.success(return_value)
-
     
     def no_visit_method(self, node, context):
         raise Exception(f'No execute_{self.name} method defined')
@@ -1662,10 +1755,12 @@ class BuiltInFunction(BaseFunction):
     def __repr__(self):
         return f"<built-in function {self.name}>"
     
-    ##########################################
-
     def execute_print(self, exec_ctx):
-        print(str(exec_ctx.symbol_table.get('value')))
+        value = exec_ctx.symbol_table.get('value')
+        output = str(value)
+        if random.random() < 0.1:
+            output = output + " Quack!"
+        print(Colors.colorize(output, Colors.BLUE))
         return RTResult().success(Number.null)
     execute_print.arg_names = ['value']
 
@@ -1827,6 +1922,75 @@ class BuiltInFunction(BaseFunction):
         
         return RTResult().success(Number.null)
     execute_run.arg_names = ["fn"]
+    
+    def execute_quack(self, exec_ctx):
+        duck_frames = [
+            "    __",
+            "___( o)>",
+            "\\ <_. )",
+            " `---'  "
+        ]
+        for i in range(5):
+            print(" " * i + "\n".join([" " * i + line for line in duck_frames]))
+            time.sleep(0.1)
+            if i < 4:
+                print("\033[F" * 4)
+        print(Colors.colorize("QUACK!", Colors.YELLOW))
+        return RTResult().success(Number.null)
+    execute_quack.arg_names = []
+    
+    def execute_flap(self, exec_ctx):
+        print(Colors.colorize("*flap flap flap*", Colors.MAGENTA))
+        return RTResult().success(Number.null)
+    execute_flap.arg_names = []
+    
+    def execute_nest(self, exec_ctx):
+        return RTResult().success(Number.null)
+    execute_nest.arg_names = []
+    
+    def execute_egg(self, exec_ctx):
+        func = exec_ctx.symbol_table.get("func")
+        hatch_time = exec_ctx.symbol_table.get("time")
+        
+        if not isinstance(func, BaseFunction):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                "First argument must be function",
+                exec_ctx
+            ))
+            
+        if not isinstance(hatch_time, Number):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                "Second argument must be number",
+                exec_ctx
+            ))
+            
+        egg = Egg(func, hatch_time.value)
+        return RTResult().success(egg.set_context(exec_ctx))
+    execute_egg.arg_names = ["func", "time"]
+    
+    def execute_hatch(self, exec_ctx):
+        egg = exec_ctx.symbol_table.get("egg")
+        
+        if not isinstance(egg, Egg):
+            return RTResult().failure(RTError(
+                self.pos_start, self.pos_end,
+                "Argument must be egg",
+                exec_ctx
+            ))
+            
+        func, error = egg.hatch()
+        if error:
+            return RTResult().failure(error)
+            
+        return RTResult().success(func)
+    execute_hatch.arg_names = ["egg"]
+    
+    def execute_mood(self, exec_ctx):
+        mood_info = f"{duck_mood.get_mood_string()} (weather: {duck_mood.get_weather_string()})"
+        return RTResult().success(String(mood_info))
+    execute_mood.arg_names = []
 
 BuiltInFunction.print       = BuiltInFunction("print")
 BuiltInFunction.print_ret   = BuiltInFunction("print_ret")
@@ -1842,8 +2006,12 @@ BuiltInFunction.pop         = BuiltInFunction("pop")
 BuiltInFunction.extend      = BuiltInFunction("extend")
 BuiltInFunction.len         = BuiltInFunction("len")
 BuiltInFunction.run         = BuiltInFunction("run")
-
-# CONTEXT
+BuiltInFunction.quack       = BuiltInFunction("quack")
+BuiltInFunction.flap        = BuiltInFunction("flap")
+BuiltInFunction.nest        = BuiltInFunction("nest")
+BuiltInFunction.egg         = BuiltInFunction("egg")
+BuiltInFunction.hatch       = BuiltInFunction("hatch")
+BuiltInFunction.mood        = BuiltInFunction("mood")
 
 class Context:
     def __init__(self, display_name, parent=None, parent_entry_pos=None):
@@ -1851,8 +2019,6 @@ class Context:
         self.parent = parent
         self.parent_entry_pos = parent_entry_pos
         self.symbol_table = None
-
-# SYMBOL TABLE
 
 class SymbolTable:
     def __init__(self, parent=None):
@@ -1870,8 +2036,6 @@ class SymbolTable:
 
     def remove(self, name):
         del self.symbols[name]
-
-# INTERPRETER
 
 class Interpreter:
     def visit(self, node, context):
@@ -1916,6 +2080,13 @@ class Interpreter:
                 context
             ))
 
+        if not duck_mood.access_variable(var_name):
+            return res.failure(RTError(
+                node.pos_start, node.pos_end,
+                f"Duck forgot about '{var_name}'! (Variable not used recently)",
+                context
+            ))
+
         value = value.copy().set_pos(node.pos_start, node.pos_end).set_context(context)
         return res.success(value)
     
@@ -1930,6 +2101,9 @@ class Interpreter:
 
     def visit_BinOpNode(self, node, context):
         res = RTResult()
+        duck_mood.increment_operations()
+        duck_mood.execute_delay()
+        
         left = res.register(self.visit(node.left_node, context))
         if res.should_return(): return res
         right = res.register(self.visit(node.right_node, context))
@@ -2111,6 +2285,9 @@ class Interpreter:
             if res.should_return(): return res
         else:
             value = Number.null
+        
+        if random.random() < 0.15:
+            print(Colors.colorize("Quack! (return)", Colors.YELLOW))
             
         return res.success_return(value)
     
@@ -2119,8 +2296,6 @@ class Interpreter:
 
     def visit_BreakNode(self, node, context):
         return RTResult().success_break()
-
-# RUN
 
 global_symbol_table = SymbolTable()
 global_symbol_table.set("NULL", Number.null)
@@ -2142,6 +2317,12 @@ global_symbol_table.set("POP", BuiltInFunction.pop)
 global_symbol_table.set("EXTEND", BuiltInFunction.extend)
 global_symbol_table.set("LEN", BuiltInFunction.len)
 global_symbol_table.set("RUN", BuiltInFunction.run)
+global_symbol_table.set("QUACK", BuiltInFunction.quack)
+global_symbol_table.set("FLAP", BuiltInFunction.flap)
+global_symbol_table.set("NEST", BuiltInFunction.nest)
+global_symbol_table.set("EGG", BuiltInFunction.egg)
+global_symbol_table.set("HATCH", BuiltInFunction.hatch)
+global_symbol_table.set("MOOD", BuiltInFunction.mood)
 
 def run(fn, text):
     lexer = Lexer(fn, text)
