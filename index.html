@@ -353,8 +353,7 @@ Once loaded, type your code and click "Run Code" to see the magic happen.
         import asyncio
         import js
         from pyodide.ffi import create_proxy
-        import quackscript
-        
+
         # Store the interpreter state
         interpreter_state = {
             'context': None,
@@ -376,6 +375,9 @@ Once loaded, type your code and click "Run Code" to see the magic happen.
                 loading_indicator.style.display = 'none'
                 
                 append_output(f"> Running: {code[:50]}..." if len(code) > 50 else f"> Running: {code}", 'success')
+                
+                # Import quackscript here to avoid issues
+                import quackscript
                 
                 # Run the code through QuackScript
                 result, error = quackscript.run('<browser>', code)
@@ -402,71 +404,77 @@ Once loaded, type your code and click "Run Code" to see the magic happen.
             clear_button = js.document.getElementById("clearButton")
             docs_button = js.document.getElementById("docsButton")
             
-            run_button.addEventListener("click", create_proxy(lambda e: asyncio.ensure_future(
-                run_quackscript(js.document.getElementById("editor").value)
-            )))
+            def run_code(e):
+                code = js.document.getElementById("editor").value
+                asyncio.ensure_future(run_quackscript(code))
             
-            clear_button.addEventListener("click", create_proxy(lambda e: 
+            def clear_output(e):
                 js.document.getElementById("output").innerHTML = 'Console cleared.\n'
-            ))
             
-            docs_button.addEventListener("click", create_proxy(lambda e: 
+            def open_docs(e):
                 js.window.open('https://github.com/yourusername/quackscript', '_blank')
-            ))
+            
+            run_button.addEventListener("click", create_proxy(run_code))
+            clear_button.addEventListener("click", create_proxy(clear_output))
+            docs_button.addEventListener("click", create_proxy(open_docs))
             
             # Example buttons
             example_buttons = js.document.querySelectorAll(".example-btn")
             for btn in example_buttons:
-                btn.addEventListener("click", create_proxy(lambda e: 
-                    load_example(e.target.getAttribute("data-example"))
-                ))
+                def make_example_handler(example_name):
+                    def handler(e):
+                        load_example(example_name)
+                    return handler
+                
+                example_name = btn.getAttribute("data-example")
+                btn.addEventListener("click", create_proxy(make_example_handler(example_name)))
         
         def load_example(example_name):
             examples = {
-                'hello': `# Hello World in QuackScript
-        QUACK()
-        PRINT("Hello, World!")
-        PRINT("Welcome to QuackScript!")`,
+                'hello': '''# Hello World in QuackScript
+QUACK()
+PRINT("Hello, World!")
+PRINT("Welcome to QuackScript!")''',
                 
-                'loops': `# Loop examples
-        PRINT("Counting to 10:")
-        FOR i = 1 TO 11 THEN
-            PRINT(i)
-        END
+                'loops': '''# Loop examples
+PRINT("Counting to 10:")
+FOR i = 1 TO 11 THEN
+    PRINT(i)
+END
 
-        PRINT("Even numbers:")
-        FOR i = 0 TO 20 STEP 2 THEN
-            PRINT(i)
-        END`,
+PRINT("Even numbers:")
+FOR i = 0 TO 20 STEP 2 THEN
+    PRINT(i)
+END''',
                 
-                'functions': `# Function examples
-        FUN add(a, b) -> a + b
-        FUN multiply(a, b) -> a * b
+                'functions': '''# Function examples
+FUN add(a, b) -> a + b
+FUN multiply(a, b) -> a * b
 
-        PRINT(add(5, 3))
-        PRINT(multiply(4, 7))
+PRINT(add(5, 3))
+PRINT(multiply(4, 7))
 
-        FUN factorial(n)
-            IF n <= 1 THEN
-                RETURN 1
-            ELSE
-                RETURN n * factorial(n - 1)
-            END
-        END
+FUN factorial(n)
+    IF n <= 1 THEN
+        RETURN 1
+    ELSE
+        RETURN n * factorial(n - 1)
+    END
+END
 
-        PRINT(factorial(5))`,
+PRINT(factorial(5))''',
                 
-                'egg': `# Egg System Demo
-        PRINT("Creating an egg...")
-        FUN surprise() -> "Surprise! The egg hatched!"
-        VAR myEgg = EGG(surprise, 3)
+                'egg': '''# Egg System Demo
+PRINT("Creating an egg...")
+FUN surprise() -> "Surprise! The egg hatched!"
+VAR myEgg = EGG(surprise, 3)
 
-        PRINT("Egg created: " + PRINT_RET(myEgg))
-        PRINT("Wait 3 seconds, then run HATCH(myEgg)")
+PRINT("Egg created: " + PRINT_RET(myEgg))
+PRINT("Wait 3 seconds, then run HATCH(myEgg)")
 
-        # After 3 seconds:
-        # VAR hatched = HATCH(myEgg)
-        # PRINT(hatched())`
+# After 3 seconds:
+# VAR hatched = HATCH(myEgg)
+# PRINT(hatched())'''
             }
             
             if example_name in examples:
