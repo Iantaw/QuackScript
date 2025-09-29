@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuackScript Playground</title>
+    
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css">
+    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            animation: fadeInDown 0.6s ease;
+        }
+
+        .duck-logo {
+            font-size: 80px;
+            margin-bottom: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .tagline {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .panel-title {
+            color: #667eea;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .mood-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #555;
+            background: #f0f0f0;
+            padding: 5px 12px;
+            border-radius: 20px;
+        }
+
+        #editor {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+
+        #output {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: #1e1e1e;
+            color: #00ff00;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .examples {
+            margin-top: 15px;
+        }
+
+        .example-btn {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 8px 15px;
+            font-size: 0.9em;
+        }
+
+        .docs-link {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .info-section {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ffd700;
+        }
+
+        .feature-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 968px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .duck-logo {
+                font-size: 60px;
+            }
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .success {
+            color: #51cf66;
+        }
+
+        .loading {
+            opacity: 0.6;
+        }
+
+        /* PyScript loading indicator */
+        #loading-indicator {
+            display: none;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="duck-logo">🦆</div>
+            <h1>QuackScript Playground</h1>
+            <p class="tagline">A whimsical programming language with personality!</p>
+        </header>
+
+        <div id="loading-indicator">
+            <p>🦆 Loading QuackScript interpreter... This may take a moment.</p>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Code Editor</span>
+                    <div class="mood-indicator">
+                        <span id="moodEmoji">😊</span>
+                        <span id="moodText">Normal</span>
+                    </div>
+                </div>
+                <textarea id="editor" spellcheck="false"># Welcome to QuackScript!
+# Try some duck-themed programming
+
+QUACK()
+PRINT("Hello from QuackScript!")
+
+# Check the duck's mood
+PRINT(MOOD())
+
+# Try a function
+FUN greet(name) -> "Hello, " + name
+PRINT(greet("Duck"))
+
+# Use lists
+VAR numbers = [1, 2, 3, 4, 5]
+PRINT(numbers)</textarea>
+                <div class="controls">
+                    <button id="runButton">▶ Run Code</button>
+                    <button id="clearButton">🗑 Clear Output</button>
+                    <button class="docs-link" id="docsButton">📚 Documentation</button>
+                </div>
+                <div class="examples">
+                    <strong style="color: #667eea;">Examples:</strong><br>
+                    <button class="example-btn" data-example="hello">Hello World</button>
+                    <button class="example-btn" data-example="loops">Loops</button>
+                    <button class="example-btn" data-example="functions">Functions</button>
+                    <button class="example-btn" data-example="egg">Egg System</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Output Console</span>
+                </div>
+                <div id="output">QuackScript Console Ready!
+PyScript is loading the interpreter...
+Once loaded, type your code and click "Run Code" to see the magic happen.
+</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2 style="margin-bottom: 15px;">Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-title">🎭 Duck Moods</div>
+                    <div>The duck's mood affects execution speed: normal, energetic, hyper, or tired!</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">🌦️ Weather System</div>
+                    <div>Random weather events change how your code behaves and looks!</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">🥚 Egg System</div>
+                    <div>Create eggs that hatch into functions after a delay!</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">🧠 Duck Memory</div>
+                    <div>Variables unused for too long might be forgotten!</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">🎨 Colorful Output</div>
+                    <div>Beautiful colored terminal output for different data types!</div>
+                </div>
+                <div class="feature">
+                    <div class="feature-title">🦆 Duck Functions</div>
+                    <div>QUACK(), FLAP(), and other fun built-in functions!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <py-config>
+        packages = []
+        [[fetch]]
+        files = ["./quackscript.py"]
+    </py-config>
+
+    <py-script>
+        import asyncio
+        import js
+        from pyodide.ffi import create_proxy
+        import quackscript
+        
+        # Store the interpreter state
+        interpreter_state = {
+            'context': None,
+            'symbol_table': None
+        }
+        
+        def append_output(text, type_class='normal'):
+            output_div = js.document.getElementById("output")
+            line = js.document.createElement("div")
+            line.className = type_class
+            line.textContent = text
+            output_div.appendChild(line)
+            output_div.scrollTop = output_div.scrollHeight
+        
+        async def run_quackscript(code):
+            try:
+                # Hide loading indicator
+                loading_indicator = js.document.getElementById("loading-indicator")
+                loading_indicator.style.display = 'none'
+                
+                append_output(f"> Running: {code[:50]}..." if len(code) > 50 else f"> Running: {code}", 'success')
+                
+                # Run the code through QuackScript
+                result, error = quackscript.run('<browser>', code)
+                
+                if error:
+                    append_output(f"Error: {error.as_string()}", 'error')
+                elif result:
+                    if hasattr(result, 'elements'):
+                        if len(result.elements) == 1:
+                            append_output(f"Result: {repr(result.elements[0])}", 'success')
+                        else:
+                            append_output(f"Result: {repr(result)}", 'success')
+                    else:
+                        append_output(f"Result: {repr(result)}", 'success')
+                else:
+                    append_output("Execution completed.", 'success')
+                    
+            except Exception as e:
+                append_output(f"Python Error: {str(e)}", 'error')
+        
+        def setup_event_listeners():
+            # Set up button event listeners
+            run_button = js.document.getElementById("runButton")
+            clear_button = js.document.getElementById("clearButton")
+            docs_button = js.document.getElementById("docsButton")
+            
+            run_button.addEventListener("click", create_proxy(lambda e: asyncio.ensure_future(
+                run_quackscript(js.document.getElementById("editor").value)
+            )))
+            
+            clear_button.addEventListener("click", create_proxy(lambda e: 
+                js.document.getElementById("output").innerHTML = 'Console cleared.\n'
+            ))
+            
+            docs_button.addEventListener("click", create_proxy(lambda e: 
+                js.window.open('https://github.com/yourusername/quackscript', '_blank')
+            ))
+            
+            # Example buttons
+            example_buttons = js.document.querySelectorAll(".example-btn")
+            for btn in example_buttons:
+                btn.addEventListener("click", create_proxy(lambda e: 
+                    load_example(e.target.getAttribute("data-example"))
+                ))
+        
+        def load_example(example_name):
+            examples = {
+                'hello': `# Hello World in QuackScript
+        QUACK()
+        PRINT("Hello, World!")
+        PRINT("Welcome to QuackScript!")`,
+                
+                'loops': `# Loop examples
+        PRINT("Counting to 10:")
+        FOR i = 1 TO 11 THEN
+            PRINT(i)
+        END
+
+        PRINT("Even numbers:")
+        FOR i = 0 TO 20 STEP 2 THEN
+            PRINT(i)
+        END`,
+                
+                'functions': `# Function examples
+        FUN add(a, b) -> a + b
+        FUN multiply(a, b) -> a * b
+
+        PRINT(add(5, 3))
+        PRINT(multiply(4, 7))
+
+        FUN factorial(n)
+            IF n <= 1 THEN
+                RETURN 1
+            ELSE
+                RETURN n * factorial(n - 1)
+            END
+        END
+
+        PRINT(factorial(5))`,
+                
+                'egg': `# Egg System Demo
+        PRINT("Creating an egg...")
+        FUN surprise() -> "Surprise! The egg hatched!"
+        VAR myEgg = EGG(surprise, 3)
+
+        PRINT("Egg created: " + PRINT_RET(myEgg))
+        PRINT("Wait 3 seconds, then run HATCH(myEgg)")
+
+        # After 3 seconds:
+        # VAR hatched = HATCH(myEgg)
+        # PRINT(hatched())`
+            }
+            
+            if example_name in examples:
+                js.document.getElementById("editor").value = examples[example_name]
+        
+        # Initialize when PyScript is ready
+        def init():
+            loading_indicator = js.document.getElementById("loading-indicator")
+            loading_indicator.style.display = 'block'
+            append_output("🦆 QuackScript interpreter loaded successfully!", 'success')
+            setup_event_listeners()
+        
+        # Run initialization
+        init()
+    </py-script>
+
+    <script>
+        // Show loading indicator while PyScript initializes
+        document.addEventListener('DOMContentLoaded', function() {
+            const loadingIndicator = document.getElementById('loading-indicator');
+            loadingIndicator.style.display = 'block';
+            
+            // Mood simulation (client-side only features)
+            let mood = 'normal';
+            let weather = 'sunny';
+            let operationCount = 0;
+            
+            function updateMood() {
+                const moods = {
+                    normal: { emoji: '😊', text: 'Normal' },
+                    energetic: { emoji: '😄', text: 'Energetic' },
+                    hyper: { emoji: '🤪', text: 'Hyper' },
+                    tired: { emoji: '😴', text: 'Tired' }
+                };
+                
+                const current = moods[mood];
+                document.getElementById('moodEmoji').textContent = current.emoji;
+                document.getElementById('moodText').textContent = `${current.text} (${weather})`;
+            }
+            
+            function simulateMoodChange() {
+                operationCount++;
+                if (operationCount > 100) {
+                    mood = 'hyper';
+                } else if (operationCount > 50) {
+                    mood = 'energetic';
+                } else {
+                    mood = 'normal';
+                }
+
+                if (Math.random() < 0.05) {
+                    weather = ['sunny', 'rainy', 'stormy', 'cloudy'][Math.floor(Math.random() * 4)];
+                }
+                updateMood();
+            }
+            
+            // Update mood when Run button is clicked
+            document.getElementById('runButton').addEventListener('click', simulateMoodChange);
+            
+            updateMood();
+        });
+    </script>
+</body>
+</html>
