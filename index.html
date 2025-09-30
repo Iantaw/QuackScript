@@ -1,541 +1,506 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuackScript Playground</title>
-    
-    <link rel="stylesheet" href="https://pyscript.net/releases/2024.1.1/core.css" />
-    <script type="module" src="https://pyscript.net/releases/2024.1.1/core.js"></script>
-    
+    <meta charset="UTF-8" />
+    <title>QuackScript Web Shell + Docs</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            color: #fff;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            animation: fadeInDown 0.6s ease;
-        }
-
-        .duck-logo {
-            font-size: 80px;
-            margin-bottom: 10px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        h1 {
-            font-size: 3em;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
-        .tagline {
-            font-size: 1.2em;
-            opacity: 0.9;
-        }
-
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .panel {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-        }
-
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-
-        .panel-title {
-            color: #667eea;
-            font-size: 1.4em;
-            font-weight: bold;
-        }
-
-        .mood-indicator {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9em;
-            color: #555;
-            background: #f0f0f0;
-            padding: 5px 12px;
-            border-radius: 20px;
-        }
-
-        #editor {
-            width: 100%;
-            height: 500px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            resize: vertical;
-            background: #1e1e1e;
-            color: #d4d4d4;
-        }
-
-        #output {
-            width: 100%;
-            height: 500px;
-            border: 2px solid #667eea;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            background: #1e1e1e;
-            color: #00ff00;
+        body { font-family: 'Fira Mono', 'Roboto Mono', monospace; }
+        #shell-output {
+            min-height: 300px;
+            max-height: 40vh;
             overflow-y: auto;
+            background: #18181b;
+            padding: 1em;
+            border-radius: 0.5em;
             white-space: pre-wrap;
-            word-wrap: break-word;
+            word-break: break-word;
         }
-
-        .controls {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
+        #docs-container {
+            max-height: 70vh;
+            overflow-y: auto;
+            background: #212121;
+            padding: 1.5rem;
+            border-radius: 0.5em;
+            color: #ddd;
         }
-
-        button {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            font-size: 1em;
+        #shell-input {
+            background: #27272a;
+            color: #f1f5f9;
+            min-width: 250px;
+        }
+        .shell-prompt {
+            color: #fde047;
             font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        .shell-result {
+            color: #a7f3d0;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .shell-error {
+            color: #fca5a5;
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        /* Prose styles for docs */
+        #docs-container h1 {
+            color: #f4d35e;
+            font-weight: 800;
+            font-size: 2.25rem;
+            margin-bottom: 0.75rem;
         }
-
-        button:active {
-            transform: translateY(0);
+        #docs-container h2 {
+            color: #fab005;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid #fab005;
+            padding-bottom: 0.25rem;
         }
-
-        .examples {
-            margin-top: 15px;
+        #docs-container h3 {
+            color: #fcd34d;
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.25rem;
         }
-
-        .example-btn {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            padding: 8px 15px;
-            font-size: 0.9em;
+        #docs-container pre {
+            background-color: #1e293b;
+            border-radius: 0.375rem;
+            padding: 0.75rem 1rem;
+            overflow-x: auto;
+            color: #93c5fd;
+            margin-bottom: 1rem;
+            font-family: 'Fira Mono', monospace;
+            font-size: 0.9rem;
         }
-
-        .docs-link {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        #docs-container code {
+            background: #334155;
+            padding: 0.1em 0.3em;
+            border-radius: 0.25rem;
+            font-family: 'Fira Mono', monospace;
+            font-size: 0.9rem;
         }
-
-        .info-section {
-            grid-column: 1 / -1;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 20px;
-            margin-top: 20px;
-            backdrop-filter: blur(10px);
+        #docs-container p, #docs-container ul, #docs-container ol {
+            margin-bottom: 1rem;
+            line-height: 1.6;
         }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
+        #docs-container ul, #docs-container ol {
+            padding-left: 1.25rem;
         }
-
-        .feature {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px;
-            border-radius: 10px;
-            border-left: 4px solid #ffd700;
+        #docs-container a {
+            color: #60a5fa;
+            text-decoration: underline;
+            transition: color 0.2s;
         }
-
-        .feature-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-            font-size: 1.1em;
-        }
-
-        @media (max-width: 968px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-            
-            h1 {
-                font-size: 2em;
-            }
-            
-            .duck-logo {
-                font-size: 60px;
-            }
-        }
-
-        .error {
-            color: #ff6b6b;
-        }
-
-        .success {
-            color: #51cf66;
-        }
-
-        .loading {
-            opacity: 0.6;
-        }
-
-        /* PyScript loading indicator */
-        #loading-indicator {
-            display: none;
-            text-align: center;
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin-bottom: 10px;
+        #docs-container a:hover {
+            color: #3b82f6;
         }
     </style>
 </head>
-<body>
-    <div class="container">
-        <header>
-            <div class="duck-logo">🦆</div>
-            <h1>QuackScript Playground</h1>
-            <p class="tagline">A whimsical programming language with personality!</p>
-        </header>
+<body class="bg-gray-900 text-gray-100 min-h-screen p-6">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-2 bg-zinc-800 rounded-xl shadow-xl p-6 flex flex-col">
+            <h1 class="text-3xl font-bold text-yellow-400 mb-4">QuackScript Web Shell</h1>
 
-        <div id="loading-indicator">
-            <p>🦆 Loading QuackScript interpreter... This may take a moment.</p>
-        </div>
-
-        <div class="main-content">
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Code Editor</span>
-                    <div class="mood-indicator">
-                        <span id="moodEmoji">😊</span>
-                        <span id="moodText">Normal</span>
-                    </div>
-                </div>
-                <textarea id="editor" spellcheck="false"># Welcome to QuackScript!
-# Try some duck-themed programming
-
-QUACK()
-PRINT("Hello from QuackScript!")
-
-# Check the duck's mood
-PRINT(MOOD())
-
-# Try a function
-FUN greet(name) -> "Hello, " + name
-PRINT(greet("Duck"))
-
-# Use lists
-VAR numbers = [1, 2, 3, 4, 5]
-PRINT(numbers)</textarea>
-                <div class="controls">
-                    <button id="runButton">▶ Run Code</button>
-                    <button id="clearButton">🗑 Clear Output</button>
-                    <button class="docs-link" id="docsButton">📚 Documentation</button>
-                </div>
-                <div class="examples">
-                    <strong style="color: #667eea;">Examples:</strong><br>
-                    <button class="example-btn" data-example="hello">Hello World</button>
-                    <button class="example-btn" data-example="loops">Loops</button>
-                    <button class="example-btn" data-example="functions">Functions</button>
-                    <button class="example-btn" data-example="egg">Egg System</button>
-                </div>
+            <div class="mb-4">
+                <label class="block font-bold text-gray-300 mb-1">Shell Output</label>
+                <div id="shell-output" aria-live="polite" role="log" tabindex="0"></div>
             </div>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Output Console</span>
-                </div>
-                <div id="output">QuackScript Console Ready!
-PyScript is loading the interpreter...
-Once loaded, type your code and click "Run Code" to see the magic happen.
-</div>
-            </div>
+            <form id="shell-form" class="flex gap-2" autocomplete="off" aria-label="QuackScript Shell Input">
+                <span class="shell-prompt" aria-hidden="true">quackscript &gt;</span>
+                <input id="shell-input" type="text" aria-required="true" placeholder="Enter QuackScript command" autofocus spellcheck="false" />
+                <button type="submit" class="bg-yellow-400 text-gray-900 px-4 py-2 font-bold rounded hover:bg-yellow-300">Run</button>
+            </form>
+
+            <div id="shell-loader" class="text-yellow-200 mt-2 hidden">Initializing Pyodide and QuackScript...</div>
         </div>
+        <article id="docs-container" role="doc-article">
+            <h1>QuackScript Documentation</h1>
 
-        <div class="info-section">
-            <h2 style="margin-bottom: 15px;">Features</h2>
-            <div class="features">
-                <div class="feature">
-                    <div class="feature-title">🎭 Duck Moods</div>
-                    <div>The duck's mood affects execution speed: normal, energetic, hyper, or tired!</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-title">🌦️ Weather System</div>
-                    <div>Random weather events change how your code behaves and looks!</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-title">🥚 Egg System</div>
-                    <div>Create eggs that hatch into functions after a delay!</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-title">🧠 Duck Memory</div>
-                    <div>Variables unused for too long might be forgotten!</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-title">🎨 Colorful Output</div>
-                    <div>Beautiful colored terminal output for different data types!</div>
-                </div>
-                <div class="feature">
-                    <div class="feature-title">🦆 Duck Functions</div>
-                    <div>QUACK(), FLAP(), and other fun built-in functions!</div>
-                </div>
-            </div>
-        </div>
-    </div>
+            <h2>Introduction</h2>
+            <p>QuackScript is a whimsical, duck-themed programming language with dynamic execution behavior. The language features a "duck mood" system that affects how your code runs, random weather events, and playful built-in functions.</p>
 
-    <py-config>
-        packages = []
-        [[fetch]]
-        files = ["./quackscript.py"]
-    </py-config>
+            <h2>Basic Syntax</h2>
+            <h3>Variables</h3>
+            <p>Declare variables using the <code>VAR</code> keyword:</p>
+            <pre><code>VAR x = 10
+VAR name = "Duck"
+VAR myList = [1, 2, 3]</code></pre>
 
-    <py-script>
-        import asyncio
-        import js
-        from pyodide.ffi import create_proxy
+            <h3>Data Types</h3>
+            <ul>
+                <li><strong>Numbers</strong>: Integers and floats (e.g., 42, 3.14)</li>
+                <li><strong>Strings</strong>: Text in double quotes, e.g., "Hello"</li>
+                <li><strong>Lists</strong>: Collections in square brackets, e.g., [1, 2, 3]</li>
+                <li><strong>Functions</strong>: Defined with <code>FUN</code> keyword</li>
+                <li><strong>Eggs</strong>: Special values that hatch into functions</li>
+            </ul>
 
-        # Store the interpreter state
-        interpreter_state = {
-            'context': None,
-            'symbol_table': None
-        }
-        
-        def append_output(text, type_class='normal'):
-            output_div = js.document.getElementById("output")
-            line = js.document.createElement("div")
-            line.className = type_class
-            line.textContent = text
-            output_div.appendChild(line)
-            output_div.scrollTop = output_div.scrollHeight
-        
-        async def run_quackscript(code):
-            try:
-                # Hide loading indicator
-                loading_indicator = js.document.getElementById("loading-indicator")
-                loading_indicator.style.display = 'none'
-                
-                append_output(f"> Running: {code[:50]}..." if len(code) > 50 else f"> Running: {code}", 'success')
-                
-                # Import quackscript here to avoid issues
-                import quackscript
-                
-                # Run the code through QuackScript
-                result, error = quackscript.run('<browser>', code)
-                
-                if error:
-                    append_output(f"Error: {error.as_string()}", 'error')
-                elif result:
-                    if hasattr(result, 'elements'):
-                        if len(result.elements) == 1:
-                            append_output(f"Result: {repr(result.elements[0])}", 'success')
-                        else:
-                            append_output(f"Result: {repr(result)}", 'success')
-                    else:
-                        append_output(f"Result: {repr(result)}", 'success')
-                else:
-                    append_output("Execution completed.", 'success')
-                    
-            except Exception as e:
-                append_output(f"Python Error: {str(e)}", 'error')
-        
-        def setup_event_listeners():
-            # Set up button event listeners
-            run_button = js.document.getElementById("runButton")
-            clear_button = js.document.getElementById("clearButton")
-            docs_button = js.document.getElementById("docsButton")
-            
-            def run_code(e):
-                code = js.document.getElementById("editor").value
-                asyncio.ensure_future(run_quackscript(code))
-            
-            def clear_output(e):
-                js.document.getElementById("output").innerHTML = 'Console cleared.\n'
-            
-            def open_docs(e):
-                js.window.open('https://github.com/yourusername/quackscript', '_blank')
-            
-            run_button.addEventListener("click", create_proxy(run_code))
-            clear_button.addEventListener("click", create_proxy(clear_output))
-            docs_button.addEventListener("click", create_proxy(open_docs))
-            
-            # Example buttons
-            example_buttons = js.document.querySelectorAll(".example-btn")
-            for btn in example_buttons:
-                def make_example_handler(example_name):
-                    def handler(e):
-                        load_example(example_name)
-                    return handler
-                
-                example_name = btn.getAttribute("data-example")
-                btn.addEventListener("click", create_proxy(make_example_handler(example_name)))
-        
-        def load_example(example_name):
-            examples = {
-                'hello': '''# Hello World in QuackScript
-QUACK()
-PRINT("Hello, World!")
-PRINT("Welcome to QuackScript!")''',
-                
-                'loops': '''# Loop examples
-PRINT("Counting to 10:")
-FOR i = 1 TO 11 THEN
+            <h3>Comments</h3>
+            <p>Use <code>#</code> for single-line comments:</p>
+            <pre><code># This is a comment
+VAR x = 5  # Comments can be inline too</code></pre>
+
+            <h3>Operators</h3>
+            <p><strong>Arithmetic</strong>: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code> (power)</p>
+            <p><strong>Comparison</strong>: <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code></p>
+            <p><strong>Logical</strong>: <code>AND</code>, <code>OR</code>, <code>NOT</code></p>
+            <p><strong>List Operations</strong>:</p>
+            <ul>
+                <li><code>list + item</code> - Append item to list</li>
+                <li><code>list - index</code> - Remove item at index</li>
+                <li><code>list * otherList</code> - Concatenate lists</li>
+                <li><code>list / index</code> - Get item at index</li>
+            </ul>
+
+            <h2>Control Flow</h2>
+            <h3>If Statements</h3>
+            <p><strong>Single-line</strong>:</p>
+            <pre><code>IF x > 10 THEN PRINT("Big") ELSE PRINT("Small")</code></pre>
+
+            <p><strong>Multi-line</strong>:</p>
+            <pre><code>IF x > 10 THEN
+    PRINT("Big number")
+    VAR y = x * 2
+END</code></pre>
+
+            <p><strong>With elif</strong>:</p>
+            <pre><code>IF x &lt; 0 THEN
+    PRINT("Negative")
+ELIF x == 0 THEN
+    PRINT("Zero")
+ELSE
+    PRINT("Positive")
+END</code></pre>
+
+            <h3>Loops</h3>
+            <p><strong>For Loop</strong>:</p>
+            <pre><code>FOR i = 0 TO 10 THEN PRINT(i)
+
+FOR i = 0 TO 100 STEP 10 THEN
     PRINT(i)
-END
+END</code></pre>
 
-PRINT("Even numbers:")
-FOR i = 0 TO 20 STEP 2 THEN
-    PRINT(i)
-END''',
-                
-                'functions': '''# Function examples
-FUN add(a, b) -> a + b
-FUN multiply(a, b) -> a * b
+            <p><strong>While Loop</strong>:</p>
+            <pre><code>WHILE x &lt; 10 THEN x = x + 1
 
-PRINT(add(5, 3))
-PRINT(multiply(4, 7))
+WHILE x &lt; 100 THEN
+    PRINT(x)
+    VAR x = x + 1
+END</code></pre>
 
+            <p><strong>Loop Control</strong>:</p>
+            <ul>
+                <li><code>CONTINUE</code> - Skip to next iteration</li>
+                <li><code>BREAK</code> - Exit loop</li>
+            </ul>
+
+            <h2>Functions</h2>
+            <h3>Function Definition</h3>
+            <p><strong>Single-line (arrow syntax)</strong>:</p>
+            <pre><code>FUN add(a, b) -&gt; a + b</code></pre>
+
+            <p><strong>Multi-line</strong>:</p>
+            <pre><code>FUN greet(name)
+    VAR message = "Hello, " + name
+    PRINT(message)
+    RETURN message
+END</code></pre>
+
+            <p><strong>Anonymous functions</strong>:</p>
+            <pre><code>VAR square = FUN(x) -&gt; x * x</code></pre>
+
+            <h3>Function Calls</h3>
+            <pre><code>add(5, 3)
+greet("Duck")
+square(4)</code></pre>
+
+            <h2>Built-in Functions</h2>
+            <h3>I/O Functions</h3>
+            <ul>
+                <li><code>PRINT(value)</code> - Print value (10% chance of adding "Quack!")</li>
+                <li><code>PRINT_RET(value)</code> - Return value as string</li>
+                <li><code>INPUT()</code> - Read string input</li>
+                <li><code>INPUT_INT()</code> - Read integer input</li>
+                <li><code>CLEAR()</code> / <code>CLS()</code> - Clear screen</li>
+            </ul>
+
+            <h3>Type Checking</h3>
+            <ul>
+                <li><code>IS_NUM(value)</code> - Check if number</li>
+                <li><code>IS_STR(value)</code> - Check if string</li>
+                <li><code>IS_LIST(value)</code> - Check if list</li>
+                <li><code>IS_FUN(value)</code> - Check if function</li>
+            </ul>
+
+            <h3>List Functions</h3>
+            <ul>
+                <li><code>APPEND(list, value)</code> - Add item to list</li>
+                <li><code>POP(list, index)</code> - Remove and return item</li>
+                <li><code>EXTEND(listA, listB)</code> - Add all items from listB to listA</li>
+                <li><code>LEN(list)</code> - Get list length</li>
+            </ul>
+
+            <h3>Duck-Themed Functions</h3>
+            <ul>
+                <li><code>QUACK()</code> - Animated duck walks across screen and quacks</li>
+                <li><code>FLAP()</code> - Print flapping message</li>
+                <li><code>MOOD()</code> - Get current duck mood and weather</li>
+                <li><code>EGG(func, time)</code> - Create egg that hatches after <code>time</code> seconds</li>
+                <li><code>HATCH(egg)</code> - Hatch egg to get function inside</li>
+            </ul>
+
+            <h3>Utility Functions</h3>
+            <ul>
+                <li><code>RUN(filename)</code> - Execute another QuackScript file</li>
+            </ul>
+
+            <h3>Constants</h3>
+            <ul>
+                <li><code>NULL</code> - Null value (0)</li>
+                <li><code>TRUE</code> - Boolean true (1)</li>
+                <li><code>FALSE</code> - Boolean false (0)</li>
+                <li><code>MATH_PI</code> - Pi constant (3.14159...)</li>
+            </ul>
+
+            <h2>Duck Mood System</h2>
+            <p>The duck's mood affects execution speed:</p>
+            <ul>
+                <li><strong>Normal</strong>: Standard execution speed</li>
+                <li><strong>Energetic</strong>: Faster (50+ operations)</li>
+                <li><strong>Hyper</strong>: Very fast (100+ operations)</li>
+                <li><strong>Tired</strong>: Slower (after 10 seconds of inactivity)</li>
+            </ul>
+            <p>Check mood with: <code>PRINT(MOOD())</code></p>
+
+            <h2>Weather System</h2>
+            <ul>
+                <li><strong>Sunny</strong>: Normal behavior</li>
+                <li><strong>Rainy</strong>: Adds <code>~</code> to errors, 💧 to strings, 20% slower</li>
+                <li><strong>Stormy</strong>: Numbers appear yellow, 50% slower</li>
+                <li><strong>Cloudy</strong>: Normal behavior</li>
+            </ul>
+            <p>Weather changes randomly (1% chance per operation).</p>
+
+            <h2>Duck Memory (Variable Amnesia)</h2>
+            <p>Variables unused for 30+ seconds have a 10% chance to be forgotten. Access them regularly to keep them in memory!</p>
+
+            <h2>Egg System</h2>
+            <p>Create delayed functions using eggs:</p>
+            <pre>
+# Create egg that hatches in 5 seconds
+FUN myFunc() -&gt; 42
+VAR egg = EGG(myFunc, 5)
+
+# Wait 5 seconds...
+VAR hatched = HATCH(egg)
+PRINT(hatched())  # Prints: 42
+            </pre>
+            <p>Eggs show countdown: <code>🥚 (2.3s)</code> → <code>🐥</code></p>
+
+            <h2>Color Output</h2>
+            <p>QuackScript uses colors in terminal output:</p>
+            <ul>
+                <li><strong>Errors</strong>: Red</li>
+                <li><strong>Strings</strong>: Green (with 💧 in rain)</li>
+                <li><strong>Lists</strong>: Cyan</li>
+                <li><strong>Numbers</strong>: Yellow in storms</li>
+                <li><strong>Print output</strong>: Blue</li>
+                <li><strong>Special messages</strong>: Yellow/Magenta</li>
+            </ul>
+
+            <h2>Examples</h2>
+            <h3>Factorial Function</h3>
+            <pre>
 FUN factorial(n)
-    IF n <= 1 THEN
+    IF n &lt;= 1 THEN
         RETURN 1
     ELSE
         RETURN n * factorial(n - 1)
     END
 END
 
-PRINT(factorial(5))''',
-                
-                'egg': '''# Egg System Demo
-PRINT("Creating an egg...")
-FUN surprise() -> "Surprise! The egg hatched!"
-VAR myEgg = EGG(surprise, 3)
+PRINT(factorial(5))  # 120
+            </pre>
 
-PRINT("Egg created: " + PRINT_RET(myEgg))
-PRINT("Wait 3 seconds, then run HATCH(myEgg)")
+            <h3>List Processing</h3>
+            <pre>
+VAR numbers = [1, 2, 3, 4, 5]
+VAR sum = 0
 
-# After 3 seconds:
-# VAR hatched = HATCH(myEgg)
-# PRINT(hatched())'''
-            }
-            
-            if example_name in examples:
-                js.document.getElementById("editor").value = examples[example_name]
-        
-        # Initialize when PyScript is ready
-        def init():
-            loading_indicator = js.document.getElementById("loading-indicator")
-            loading_indicator.style.display = 'block'
-            append_output("🦆 QuackScript interpreter loaded successfully!", 'success')
-            setup_event_listeners()
-        
-        # Run initialization
-        init()
-    </py-script>
+FOR i = 0 TO LEN(numbers) THEN
+    VAR sum = sum + (numbers / i)
+END
+
+PRINT(sum)
+            </pre>
+
+            <h3>Delayed Execution</h3>
+            <pre>
+FUN sayHello() -&gt; PRINT("Hello from egg!")
+VAR egg = EGG(sayHello, 3)
+PRINT("Waiting for egg to hatch...")
+PRINT(egg)  # Shows countdown
+# Wait 3 seconds
+VAR func = HATCH(egg)
+func()  # Prints: Hello from egg!
+            </pre>
+
+            <h3>Interactive Program</h3>
+            <pre>
+PRINT("What's your name?")
+VAR name = INPUT()
+PRINT("Hello, " + name + "!")
+
+QUACK()  # Duck animation
+PRINT("Current mood: " + MOOD())
+            </pre>
+
+            <h2>Tips</h2>
+            <ol>
+                <li>Keep variables active - Access them regularly to prevent amnesia</li>
+                <li>Watch the weather - Check <code>MOOD()</code> to see current conditions</li>
+                <li>Use eggs wisely - Great for timed events</li>
+                <li>Enjoy the quacks - Random "Quack!" messages add personality</li>
+                <li>Multi-line is safer - Use <code>END</code> for complex functions</li>
+            </ol>
+
+            <h2>Common Errors</h2>
+            <ul>
+                <li><strong>"Duck forgot about variable"</strong> - Variable unused too long, reassign it</li>
+                <li><strong>"Expected 'END'"</strong> - Missing <code>END</code> keyword in multi-line block</li>
+                <li><strong>"Egg not ready to hatch"</strong> - Wait for countdown to finish</li>
+                <li><strong>"Expected ',' or ')'"</strong> - Syntax error in function call/definition</li>
+            </ul>
+
+            <h2>Running QuackScript</h2>
+            <p><strong>Interactive shell</strong>:</p>
+            <pre>python shell.py</pre>
+
+            <p><strong>Run file</strong>:</p>
+            <pre>RUN("myprogram.qs")</pre>
+
+            <hr />
+            <p>Quack responsibly! 🦆</p>
+        </article>
+    </div>
 
     <script>
-        // Show loading indicator while PyScript initializes
-        document.addEventListener('DOMContentLoaded', function() {
-            const loadingIndicator = document.getElementById('loading-indicator');
-            loadingIndicator.style.display = 'block';
-            
-            // Mood simulation (client-side only features)
-            let mood = 'normal';
-            let weather = 'sunny';
-            let operationCount = 0;
-            
-            function updateMood() {
-                const moods = {
-                    normal: { emoji: '😊', text: 'Normal' },
-                    energetic: { emoji: '😄', text: 'Energetic' },
-                    hyper: { emoji: '🤪', text: 'Hyper' },
-                    tired: { emoji: '😴', text: 'Tired' }
-                };
-                
-                const current = moods[mood];
-                document.getElementById('moodEmoji').textContent = current.emoji;
-                document.getElementById('moodText').textContent = `${current.text} (${weather})`;
-            }
-            
-            function simulateMoodChange() {
-                operationCount++;
-                if (operationCount > 100) {
-                    mood = 'hyper';
-                } else if (operationCount > 50) {
-                    mood = 'energetic';
-                } else {
-                    mood = 'normal';
-                }
+        let pyodide, quackLoaded = false;
+        const VFS = {}; // In-memory "file system" for .quack files
 
-                if (Math.random() < 0.05) {
-                    weather = ['sunny', 'rainy', 'stormy', 'cloudy'][Math.floor(Math.random() * 4)];
-                }
-                updateMood();
+        function appendOutput(html, cls = "") {
+            const outputDiv = document.getElementById("shell-output");
+            const span = document.createElement("span");
+            span.className = cls;
+            span.innerHTML = html;
+            outputDiv.appendChild(span);
+            outputDiv.appendChild(document.createElement("br"));
+            outputDiv.scrollTop = outputDiv.scrollHeight;
+        }
+
+        async function loadQuackScriptFiles() {
+            const QUACKSCRIPT_ID = "./quackscript.py";
+            const STRINGS_ID = "./strings_with_arrows.py";
+            async function fetchFile(name) {
+                const resp = await fetch("/" + name);
+                if (!resp.ok) throw new Error("Failed to fetch: " + name);
+                return await resp.text();
             }
-            
-            // Update mood when Run button is clicked
-            document.getElementById('runButton').addEventListener('click', simulateMoodChange);
-            
-            updateMood();
+            return {
+                "quackscript.py": await fetchFile(QUACKSCRIPT_ID),
+                "strings_with_arrows.py": await fetchFile(STRINGS_ID),
+            };
+        }
+
+        async function initPyodideAndQuackScript() {
+            document.getElementById("shell-loader").classList.remove("hidden");
+            pyodide = await loadPyodide({
+                indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/",
+            });
+            // Load QuackScript dependencies
+            const rawfiles = await loadQuackScriptFiles();
+            pyodide.FS.writeFile("quackscript.py", rawfiles["quackscript.py"]);
+            pyodide.FS.writeFile("strings_with_arrows.py", rawfiles["strings_with_arrows.py"]);
+            await pyodide.runPythonAsync(`import sys; sys.path.append('.')`);
+            quackLoaded = true;
+            document.getElementById("shell-loader").classList.add("hidden");
+            appendOutput(
+                "QuackScript Web Shell ready. Type some commands! If you don't know what to write, check out the docs below!",
+                "text-green-300"
+            );
+        }
+
+        async function handleShellCommand(command) {
+            if (!quackLoaded) {
+                appendOutput("Interpreter not ready yet.", "shell-error");
+                return;
+            }
+            if (!command.trim()) return;
+            let runFileMatch = command.match(/RUN\s*\(\s*["'](.+?)["']\s*\)/i);
+            if (runFileMatch) {
+                let filename = runFileMatch[1];
+                let scriptCode = VFS[filename];
+                if (!scriptCode) {
+                    appendOutput("File '" + filename + "' not found in session.", "shell-error");
+                    return;
+                }
+                command = scriptCode;
+            }
+            try {
+                let pyShellCode = `
+import quackscript
+text = r"""${command.replace(/\\/g,"\\\\").replace(/"/g,'\\"')}"""
+result, error = quackscript.run('<stdin>', text)
+output = ""
+if error:
+    output = error.as_string()
+elif result:
+    try:
+        if hasattr(result, "elements") and len(result.elements) == 1:
+            output = repr(result.elements[0])
+        else:
+            output = repr(result)
+    except Exception as ex:
+        output = "Result formatting error: " + str(ex)
+else:
+    output = ""
+output
+                `.trim();
+
+                let pyresult = await pyodide.runPythonAsync(pyShellCode);
+                if (pyresult) {
+                    if (
+                        pyresult.startsWith("Illegal Character:") ||
+                        pyresult.startsWith("Invalid Syntax:") ||
+                        pyresult.startsWith("Runtime Error:")
+                    ) {
+                        appendOutput(pyresult, "shell-error");
+                    } else {
+                        appendOutput(pyresult, "shell-result");
+                    }
+                }
+            } catch (err) {
+                appendOutput("Python error: " + err, "shell-error");
+            }
+        }
+
+        document.getElementById("shell-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const inp = document.getElementById("shell-input");
+            const cmd = inp.value;
+            appendOutput(`<span class="shell-prompt">quackscript &gt; </span>${cmd}`);
+            inp.value = "";
+            await handleShellCommand(cmd);
         });
+
+        window.onload = initPyodideAndQuackScript;
     </script>
 </body>
 </html>
