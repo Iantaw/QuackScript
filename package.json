@@ -1,8 +1,0 @@
-{
-  "name": "quackscript-playground",
-  "version": "1.0.0",
-  "description": "QuackScript Playground with PyScript",
-  "scripts": {
-    "dev": "python -m http.server 8000"
-  }
-}
