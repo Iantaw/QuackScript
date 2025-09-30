@@ -46,7 +46,6 @@
             word-break: break-word;
         }
 
-        /* Prose styles for docs */
         #docs-container h1 {
             color: #f4d35e;
             font-weight: 800;
@@ -145,7 +144,7 @@ VAR myList = [1, 2, 3]</code></pre>
             <h3>Comments</h3>
             <p>Use <code>#</code> for single-line comments:</p>
             <pre><code># This is a comment
-VAR x = 5  # Comments can be inline too</code></pre>
+VAR x = 5</code></pre>
 
             <h3>Operators</h3>
             <p><strong>Arithmetic</strong>: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code> (power)</p>
@@ -170,30 +169,12 @@ VAR x = 5  # Comments can be inline too</code></pre>
     VAR y = x * 2
 END</code></pre>
 
-            <p><strong>With elif</strong>:</p>
-            <pre><code>IF x &lt; 0 THEN
-    PRINT("Negative")
-ELIF x == 0 THEN
-    PRINT("Zero")
-ELSE
-    PRINT("Positive")
-END</code></pre>
-
             <h3>Loops</h3>
             <p><strong>For Loop</strong>:</p>
-            <pre><code>FOR i = 0 TO 10 THEN PRINT(i)
-
-FOR i = 0 TO 100 STEP 10 THEN
-    PRINT(i)
-END</code></pre>
+            <pre><code>FOR i = 0 TO 10 THEN PRINT(i)</code></pre>
 
             <p><strong>While Loop</strong>:</p>
-            <pre><code>WHILE x &lt; 10 THEN x = x + 1
-
-WHILE x &lt; 100 THEN
-    PRINT(x)
-    VAR x = x + 1
-END</code></pre>
+            <pre><code>WHILE x &lt; 10 THEN x = x + 1</code></pre>
 
             <p><strong>Loop Control</strong>:</p>
             <ul>
@@ -213,18 +194,10 @@ END</code></pre>
     RETURN message
 END</code></pre>
 
-            <p><strong>Anonymous functions</strong>:</p>
-            <pre><code>VAR square = FUN(x) -&gt; x * x</code></pre>
-
-            <h3>Function Calls</h3>
-            <pre><code>add(5, 3)
-greet("Duck")
-square(4)</code></pre>
-
             <h2>Built-in Functions</h2>
             <h3>I/O Functions</h3>
             <ul>
-                <li><code>PRINT(value)</code> - Print value (10% chance of adding "Quack!")</li>
+                <li><code>PRINT(value)</code> - Print value</li>
                 <li><code>PRINT_RET(value)</code> - Return value as string</li>
                 <li><code>INPUT()</code> - Read string input</li>
                 <li><code>INPUT_INT()</code> - Read integer input</li>
@@ -256,11 +229,6 @@ square(4)</code></pre>
                 <li><code>HATCH(egg)</code> - Hatch egg to get function inside</li>
             </ul>
 
-            <h3>Utility Functions</h3>
-            <ul>
-                <li><code>RUN(filename)</code> - Execute another QuackScript file</li>
-            </ul>
-
             <h3>Constants</h3>
             <ul>
                 <li><code>NULL</code> - Null value (0)</li>
@@ -269,56 +237,9 @@ square(4)</code></pre>
                 <li><code>MATH_PI</code> - Pi constant (3.14159...)</li>
             </ul>
 
-            <h2>Duck Mood System</h2>
-            <p>The duck's mood affects execution speed:</p>
-            <ul>
-                <li><strong>Normal</strong>: Standard execution speed</li>
-                <li><strong>Energetic</strong>: Faster (50+ operations)</li>
-                <li><strong>Hyper</strong>: Very fast (100+ operations)</li>
-                <li><strong>Tired</strong>: Slower (after 10 seconds of inactivity)</li>
-            </ul>
-            <p>Check mood with: <code>PRINT(MOOD())</code></p>
-
-            <h2>Weather System</h2>
-            <ul>
-                <li><strong>Sunny</strong>: Normal behavior</li>
-                <li><strong>Rainy</strong>: Adds <code>~</code> to errors, 💧 to strings, 20% slower</li>
-                <li><strong>Stormy</strong>: Numbers appear yellow, 50% slower</li>
-                <li><strong>Cloudy</strong>: Normal behavior</li>
-            </ul>
-            <p>Weather changes randomly (1% chance per operation).</p>
-
-            <h2>Duck Memory (Variable Amnesia)</h2>
-            <p>Variables unused for 30+ seconds have a 10% chance to be forgotten. Access them regularly to keep them in memory!</p>
-
-            <h2>Egg System</h2>
-            <p>Create delayed functions using eggs:</p>
-            <pre>
-# Create egg that hatches in 5 seconds
-FUN myFunc() -&gt; 42
-VAR egg = EGG(myFunc, 5)
-
-# Wait 5 seconds...
-VAR hatched = HATCH(egg)
-PRINT(hatched())  # Prints: 42
-            </pre>
-            <p>Eggs show countdown: <code>🥚 (2.3s)</code> → <code>🐥</code></p>
-
-            <h2>Color Output</h2>
-            <p>QuackScript uses colors in terminal output:</p>
-            <ul>
-                <li><strong>Errors</strong>: Red</li>
-                <li><strong>Strings</strong>: Green (with 💧 in rain)</li>
-                <li><strong>Lists</strong>: Cyan</li>
-                <li><strong>Numbers</strong>: Yellow in storms</li>
-                <li><strong>Print output</strong>: Blue</li>
-                <li><strong>Special messages</strong>: Yellow/Magenta</li>
-            </ul>
-
             <h2>Examples</h2>
             <h3>Factorial Function</h3>
-            <pre>
-FUN factorial(n)
+            <pre>FUN factorial(n)
     IF n &lt;= 1 THEN
         RETURN 1
     ELSE
@@ -326,79 +247,28 @@ FUN factorial(n)
     END
 END
 
-PRINT(factorial(5))  # 120
-            </pre>
+PRINT(factorial(5))</pre>
 
             <h3>List Processing</h3>
-            <pre>
-VAR numbers = [1, 2, 3, 4, 5]
+            <pre>VAR numbers = [1, 2, 3, 4, 5]
 VAR sum = 0
 
 FOR i = 0 TO LEN(numbers) THEN
     VAR sum = sum + (numbers / i)
 END
 
-PRINT(sum)
-            </pre>
-
-            <h3>Delayed Execution</h3>
-            <pre>
-FUN sayHello() -&gt; PRINT("Hello from egg!")
-VAR egg = EGG(sayHello, 3)
-PRINT("Waiting for egg to hatch...")
-PRINT(egg)  # Shows countdown
-# Wait 3 seconds
-VAR func = HATCH(egg)
-func()  # Prints: Hello from egg!
-            </pre>
-
-            <h3>Interactive Program</h3>
-            <pre>
-PRINT("What's your name?")
-VAR name = INPUT()
-PRINT("Hello, " + name + "!")
-
-QUACK()  # Duck animation
-PRINT("Current mood: " + MOOD())
-            </pre>
-
-            <h2>Tips</h2>
-            <ol>
-                <li>Keep variables active - Access them regularly to prevent amnesia</li>
-                <li>Watch the weather - Check <code>MOOD()</code> to see current conditions</li>
-                <li>Use eggs wisely - Great for timed events</li>
-                <li>Enjoy the quacks - Random "Quack!" messages add personality</li>
-                <li>Multi-line is safer - Use <code>END</code> for complex functions</li>
-            </ol>
-
-            <h2>Common Errors</h2>
-            <ul>
-                <li><strong>"Duck forgot about variable"</strong> - Variable unused too long, reassign it</li>
-                <li><strong>"Expected 'END'"</strong> - Missing <code>END</code> keyword in multi-line block</li>
-                <li><strong>"Egg not ready to hatch"</strong> - Wait for countdown to finish</li>
-                <li><strong>"Expected ',' or ')'"</strong> - Syntax error in function call/definition</li>
-            </ul>
-
-            <h2>Running QuackScript</h2>
-            <p><strong>Interactive shell</strong>:</p>
-            <pre>python shell.py</pre>
-
-            <p><strong>Run file</strong>:</p>
-            <pre>RUN("myprogram.qs")</pre>
-
-            <hr />
-            <p>Quack responsibly! 🦆</p>
+PRINT(sum)</pre>
         </article>
     </div>
 
     <script>
         let pyodide, quackLoaded = false;
-        const VFS = {}; // In-memory "file system" for .quack files
+        const VFS = {};
 
-        function appendOutput(html, cls = "") {
+        function appendOutput(html, cls) {
             const outputDiv = document.getElementById("shell-output");
             const span = document.createElement("span");
-            span.className = cls;
+            span.className = cls || "";
             span.innerHTML = html;
             outputDiv.appendChild(span);
             outputDiv.appendChild(document.createElement("br"));
@@ -406,16 +276,14 @@ PRINT("Current mood: " + MOOD())
         }
 
         async function loadQuackScriptFiles() {
-            const QUACKSCRIPT_ID = "./quackscript.py";
-            const STRINGS_ID = "./strings_with_arrows.py";
             async function fetchFile(name) {
                 const resp = await fetch("/" + name);
                 if (!resp.ok) throw new Error("Failed to fetch: " + name);
                 return await resp.text();
             }
             return {
-                "quackscript.py": await fetchFile(QUACKSCRIPT_ID),
-                "strings_with_arrows.py": await fetchFile(STRINGS_ID),
+                "quackscript.py": await fetchFile("quackscript.py"),
+                "strings_with_arrows.py": await fetchFile("strings_with_arrows.py"),
             };
         }
 
@@ -424,17 +292,13 @@ PRINT("Current mood: " + MOOD())
             pyodide = await loadPyodide({
                 indexURL: "https://cdn.jsdelivr.net/pyodide/v0.25.0/full/",
             });
-            // Load QuackScript dependencies
             const rawfiles = await loadQuackScriptFiles();
             pyodide.FS.writeFile("quackscript.py", rawfiles["quackscript.py"]);
             pyodide.FS.writeFile("strings_with_arrows.py", rawfiles["strings_with_arrows.py"]);
-            await pyodide.runPythonAsync(`import sys; sys.path.append('.')`);
+            await pyodide.runPythonAsync("import sys; sys.path.append('.')");
             quackLoaded = true;
             document.getElementById("shell-loader").classList.add("hidden");
-            appendOutput(
-                "QuackScript Web Shell ready. Type some commands! If you don't know what to write, check out the docs!",
-                "text-green-300"
-            );
+            appendOutput("QuackScript Web Shell ready. Type some commands!", "text-green-300");
         }
 
         async function handleShellCommand(command) {
@@ -443,6 +307,7 @@ PRINT("Current mood: " + MOOD())
                 return;
             }
             if (!command.trim()) return;
+            
             let runFileMatch = command.match(/RUN\s*\(\s*["'](.+?)["']\s*\)/i);
             if (runFileMatch) {
                 let filename = runFileMatch[1];
@@ -453,10 +318,13 @@ PRINT("Current mood: " + MOOD())
                 }
                 command = scriptCode;
             }
+            
             try {
+                let escapedCommand = command.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
                 let pyShellCode = `
 import quackscript
-text = r"""${command.replace(/\\/g,"\\\\").replace(/"/g,'\\"')}"""
+
+text = '''${escapedCommand}'''
 result, error = quackscript.run('<stdin>', text)
 output = ""
 if error:
@@ -472,15 +340,29 @@ elif result:
 else:
     output = ""
 output
-                `.trim();
+`;
 
                 let pyresult = await pyodide.runPythonAsync(pyShellCode);
                 if (pyresult) {
-                    if (
-                        pyresult.startsWith("Illegal Character:") ||
-                        pyresult.startsWith("Invalid Syntax:") ||
-                        pyresult.startsWith("Runtime Error:")
-                    ) {
+                    pyresult = pyresult
+                        .replace(/\033\[91m/g, '<span style="color:#fca5a5">')
+                        .replace(/\033\[92m/g, '<span style="color:#86efac">')
+                        .replace(/\033\[93m/g, '<span style="color:#fde047">')
+                        .replace(/\033\[94m/g, '<span style="color:#93c5fd">')
+                        .replace(/\033\[95m/g, '<span style="color:#e9d5ff">')
+                        .replace(/\033\[96m/g, '<span style="color:#a5f3fc">')
+                        .replace(/\033\[0m/g, '</span>')
+                        .replace(/\[91m/g, '<span style="color:#fca5a5">')
+                        .replace(/\[92m/g, '<span style="color:#86efac">')
+                        .replace(/\[93m/g, '<span style="color:#fde047">')
+                        .replace(/\[94m/g, '<span style="color:#93c5fd">')
+                        .replace(/\[95m/g, '<span style="color:#e9d5ff">')
+                        .replace(/\[96m/g, '<span style="color:#a5f3fc">')
+                        .replace(/\[0m/g, '</span>');
+                    
+                    if (pyresult.startsWith("Illegal Character:") || 
+                        pyresult.startsWith("Invalid Syntax:") || 
+                        pyresult.startsWith("Runtime Error:")) {
                         appendOutput(pyresult, "shell-error");
                     } else {
                         appendOutput(pyresult, "shell-result");
@@ -491,11 +373,11 @@ output
             }
         }
 
-        document.getElementById("shell-form").addEventListener("submit", async (e) => {
+        document.getElementById("shell-form").addEventListener("submit", async function(e) {
             e.preventDefault();
             const inp = document.getElementById("shell-input");
             const cmd = inp.value;
-            appendOutput(`<span class="shell-prompt">quackscript &gt; </span>${cmd}`);
+            appendOutput('<span class="shell-prompt">quackscript &gt; </span>' + cmd);
             inp.value = "";
             await handleShellCommand(cmd);
         });
