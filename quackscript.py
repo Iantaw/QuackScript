@@ -1777,20 +1777,40 @@ class BuiltInFunction(BaseFunction):
     execute_print_ret.arg_names = ['value']
 
     def execute_input(self, exec_ctx):
-        text = input()
-        return RTResult().success(String(text))
+        try:
+            import js
+            text = js.prompt("Enter input:")
+            if text is None:
+                text = ""
+            return RTResult().success(String(str(text)))
+        except ImportError:
+            text = input()
+            return RTResult().success(String(text))
     execute_input.arg_names = []
 
     def execute_input_int(self, exec_ctx):
-        while True:
-            text = input()
-            try:
-                number = int(text)
-                break
-            except ValueError:
-                print(f"'{text}' must be an integer. Try again!")
-        return RTResult().success(Number(number))
+        try:
+            import js
+            while True:
+                text = js.prompt("Enter an integer:")
+                if text is None:
+                    return RTResult().success(Number(0))
+                try:
+                    number = int(text)
+                    return RTResult().success(Number(number))
+                except ValueError:
+                    js.alert(f"'{text}' must be an integer. Try again!")
+        except ImportError:
+            while True:
+                text = input()
+                try:
+                    number = int(text)
+                    break
+                except ValueError:
+                    print(f"'{text}' must be an integer. Try again!")
+            return RTResult().success(Number(number))
     execute_input_int.arg_names = []
+
 
     def execute_clear(self, exec_ctx):
         os.system('cls' if os.name == 'nt' else 'clear')
