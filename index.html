@@ -175,7 +175,7 @@ END</code></pre>
 
             <p><strong>While Loop</strong>:</p>
             <pre><code>VAR x = 0
-WHILE x &lt; 10 THEN x = x + 1</code></pre>
+WHILE x &lt; 10 THEN VAR x = x + 1</code></pre>
 
             <p><strong>Loop Control</strong>:</p>
             <ul>
@@ -281,6 +281,8 @@ PRINT(sum)</pre>
                 const resp = await fetch(name);
                 if (!resp.ok) throw new Error("Failed to fetch: " + name);
                 return await resp.text();
+
+
             }
             return {
                 "quackscript.py": await fetchFile("quackscript.py"),
