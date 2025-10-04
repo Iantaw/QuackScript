@@ -409,10 +409,11 @@ class Lexer:
     def skip_comment(self):
         self.advance()
 
-        while self.current_char != '\n':
+        while self.current_char != None and self.current_char != '\n':
             self.advance()
 
-        self.advance()
+        if self.current_char == '\n':
+            self.advance()
 
 class NumberNode:
     def __init__(self, tok):
@@ -623,6 +624,13 @@ class Parser:
         while self.current_tok.type == TT_NEWLINE:
             res.register_advancement()
             self.advance()
+
+        if self.current_tok.type == TT_EOF:
+            return res.success(ListNode(
+                statements,
+                pos_start,
+                self.current_tok.pos_end.copy()
+            ))
 
         statement = res.register(self.statement())
         if res.error: return res
